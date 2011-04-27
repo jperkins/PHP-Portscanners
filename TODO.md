@@ -5,14 +5,22 @@
 ## align with current conventions ##
 
 
-- method names and formatting
-- variable names and formatting
-- visibility on methods
+
+
+
 
 ## done ##
 
 - filename extensions changed to .php
 - class name and formatting
+- method names, visibility and formatting
+
+
+- variable names and formatting
+    - minPort => startPort
+    - maxPort => endPort
+    - ports => openPorts
+
 
 
 # UDP Port Scanner

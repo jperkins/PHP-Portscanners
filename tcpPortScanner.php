@@ -32,18 +32,18 @@
  */
 
 class TcpPortScanner {
-    var $minPort;
-    var $maxPort;
+    var $startPort;
+    var $endPort;
     var $targetIP;
     var $timeout;
 
-    var $ports = array();
+    var $openPorts = array();
 
-    public function __construct ($targetIP, $minPort=1, $maxPort=1024, $timeout=1) {
-        $this->targetIP = $targetIP;
-        $this->minPort  = $minPort;
-        $this->maxPort  = $maxPort;
-        $this->timeout  = $timeout;
+    public function __construct ($targetIP, $startPort=1, $endPort=1024, $timeout=1) {
+        $this->startPort = $startPort;
+        $this->endPort   = $endPort;
+        $this->targetIP  = $targetIP;
+        $this->timeout   = $timeout;
     }
 
     /*
@@ -58,27 +58,27 @@ class TcpPortScanner {
     public function scan () {
         set_time_limit(0);
 
-        for ($index = $this-> minPort; $index <= $this-> maxPort; $index++) {
+        for ($index = $this->startPort; $index <= $this->endPort; $index++) {
             echo "scanning port: $index<br/>";
 
             flush();
 
             $handle = fsockopen(
-                $this-> targetIP,
+                $this->targetIP,
                 $index,
                 $errno,
                 $errstr,
-                $this-> timeout
+                $this->timeout
             );
 
             if ($handle) {
-                $service              = getservbyport($index, "tcp");
-                $this-> ports[$index] = "$service";
+                $service                 = getservbyport($index, "tcp");
+                $this->openPorts[$index] = "$service";
 
                 fclose($handle);
             }
         }
 
-    return $this-> ports;
+        return $this->openPorts;
     }
 }
