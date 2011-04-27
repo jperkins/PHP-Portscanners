@@ -52,7 +52,7 @@
         *   and the service on that port in an array. the array is returned when the loop ends.
         */
 
-        function doScan () {
+        public function scan () {
             set_time_limit(0);
 
             for ($index = $this-> minPort; $index <= $this-> maxPort; $index++)
