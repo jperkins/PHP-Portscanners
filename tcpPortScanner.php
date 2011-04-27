@@ -13,7 +13,8 @@
     *   include ('classes/TcpPortScanner.php');
     *
     *   $tcpScanner = new TcpPortScanner("$REMOTE_ADDR");
-    *   $ports = $tcpScanner-> doScan();
+    *   $ports      = $tcpScanner-> doScan();
+    *
     *   if (count($ports) == 0) {
     *       echo "no open tcp ports detected.<br/>";
     *   } else {
@@ -28,21 +29,14 @@
     *  released on 2001-10-15
     */
 
-    class TcpPortScanner
-    {
+    class TcpPortScanner {
         var $targetIP;
         var $minPort;
         var $maxPort;
         var $timeout;
         var $ports = array();
 
-        /*
-        *   tcpPortScanner constructor
-        *
-        *   some variable initialization going on here.
-        */
-
-        function tcpPortScanner ($targetIP, $minPort=1, $maxPort=1024, $timeout=1) {
+        public function __construct ($targetIP, $minPort=1, $maxPort=1024, $timeout=1) {
             $this->targetIP = $targetIP;
             $this->minPort = $minPort;
             $this->maxPort = $maxPort;
