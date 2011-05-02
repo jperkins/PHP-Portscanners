@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
  * TCP Portscanner
@@ -9,23 +9,23 @@
  *
  * Usage:
  *
- *  include ('classes/TcpPortScanner.php');
+ *   include ('classes/TcpPortScanner.php');
  *
- *  $tcpScanner = new TcpPortScanner("$REMOTE_ADDR");
- *  $openPorts  = $tcpScanner->scan();
+ *   $tcpScanner = new TcpPortScanner("$REMOTE_ADDR");
+ *   $openPorts  = $tcpScanner->scan();
  *
- *  if (count($openPorts) == 0) {
- *      echo "no open tcp ports detected.<br/>";
- *  } else {
- *      echo "open tcp ports:<br/>";
+ *   if (count($openPorts) == 0) {
+ *       echo "no open tcp ports detected.<br/>";
+ *   } else {
+ *       echo "open tcp ports:<br/>";
  *
- *      foreach ($openPorts as $portNumber => $service) {
- *          echo "$portNumber ($service)<br/>";
- *      }
- *  }
+ *       foreach ($openPorts as $portNumber => $service) {
+ *           echo "$portNumber ($service)<br/>";
+ *       }
+ *   }
  *
  * @package default
- * @author Jason Perkins  (jperkins70@gmail.com)
+ * @author Jason Perkins (jperkins70@gmail.com)
  * @version 1.0
  * released on 2001-10-15
  *
@@ -34,21 +34,31 @@
 class TcpPortScanner {
     var $startPort;
     var $endPort;
-    var $targetIP;
+    var $hostIP;
     var $timeout;
 
     var $openPorts = array();
 
-    public function __construct ($targetIP, $startPort=1, $endPort=1024, $timeout=1) {
+
+    // TODO: accept IPv6 addresses
+    // TODO: accept an array of host ips
+    // TODO: allow a hostname to be supplied
+    // TODO: accept an array of hostnames
+
+    // TODO: validate that the starting port is between 1 and 65536
+    // TODO: validate that the ending port is between 1 and 65536
+
+    // TODO: validate that the ending port is after the starting port
+    public function __construct ($hostIP, $startPort=1, $endPort=1024, $timeout=1) {
         $this->startPort = $startPort;
         $this->endPort   = $endPort;
-        $this->targetIP  = $targetIP;
+        $this->hostIP    = $hostIP;
         $this->timeout   = $timeout;
     }
 
     /*
      *
-     * Executes a scan against the target IP
+     * Scans the host IP
      *
      * @return void
      * @author Jason Perkins
@@ -56,6 +66,7 @@ class TcpPortScanner {
      */
 
     public function scan () {
+        // TODO: verify that set_time_limit() is required
         set_time_limit(0);
 
         for ($index = $this->startPort; $index <= $this->endPort; $index++) {
@@ -63,8 +74,9 @@ class TcpPortScanner {
 
             flush();
 
+            // TODO: deal with exceptions thrown by fsockopen
             $handle = fsockopen(
-                $this->targetIP,
+                $this->hostIP,
                 $index,
                 $errno,
                 $errstr,
@@ -72,7 +84,7 @@ class TcpPortScanner {
             );
 
             if ($handle) {
-                $service                 = getservbyport($index, "tcp");
+                $service = getservbyport($index, "tcp");
                 $this->openPorts[$index] = "$service";
 
                 fclose($handle);
