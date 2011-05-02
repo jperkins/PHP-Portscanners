@@ -42,7 +42,7 @@ class udpPortScanner
      *
      *   class constructor. we initialize a couple of object variables here.
      */
-    function udpPortScanner($targetIP, $minPort = 1, $maxPort = 1024, $output = 1)
+    function __construct($targetIP, $minPort = 1, $maxPort = 1024, $output = 1)
     {
         // intitalize variables
         $this->targetIP = "udp://$targetIP";
@@ -62,12 +62,12 @@ class udpPortScanner
      *   and finally return an array indexed by the ports that we found open.
      *
      */
-    function doScan()
+    public function doScan()
     {
         // conduct initial scan and setup scanner parameters
         echo "conducting initial scan to determine network characteristics...<br/>";
         flush();
-        $this->_networkProbe();
+        $this->networkProbe();
 
         // conduct the scan
         for ($portNumber = $this->minPort; $portNumber <= $this->maxPort; $portNumber++) {
@@ -76,7 +76,7 @@ class udpPortScanner
                 flush();
             }
 
-            if ($this->_scanPort($portNumber)) {
+            if ($this->scanPort($portNumber)) {
                 $service                  = getservbyport($portNumber, udp);
                 $this->ports[$portNumber] = $service;
             }
@@ -84,7 +84,7 @@ class udpPortScanner
 
         // now call the method that will test for and remove detected fasle
         // positives
-        $this->_removeFalsePositives();
+        $this->removeFalsePositives();
 
         // return the detected open ports array
         return $this->ports;
@@ -105,7 +105,7 @@ class udpPortScanner
      *   value (false).
      */
 
-    function _scanPort($portNumber)
+    private function _scanPort($portNumber)
     {
         $handle = fsockopen($this->targetIP, $portNumber, &$errno, &$errstr, 2);
 
@@ -147,7 +147,7 @@ class udpPortScanner
      *   _networkProbe method. the array of tested ports is returned.
      */
 
-    function _removeFalsePositives()
+    private function _removeFalsePositives()
     {
         if (count($this->ports) > 0) {
             $noInitiallyOpenPorts = count($this->ports);
@@ -165,7 +165,7 @@ class udpPortScanner
                 }
                 flush();
                 foreach ($this->ports as $portNumber => $status) {
-                    if (!$this->_scanPort($portNumber)) {
+                    if (!$this->scanPort($portNumber)) {
                         unset($this->ports[$portNumber]);
                     }
                 }
@@ -200,7 +200,7 @@ class udpPortScanner
      *
      */
 
-    function _networkProbe($noTrials = 100, $startPortNumber = 55000)
+    private function _networkProbe($noTrials = 100, $startPortNumber = 55000)
     {
         $endPortNumber = $startPortNumber + $noTrials;
 
@@ -211,9 +211,9 @@ class udpPortScanner
 
         // setup a for loop to scan the ports
         for ($portNumber = $startPortNumber; $portNumber < $endPortNumber; $portNumber++) {
-            $startTime = $this->_getmicrotime();
-            $result    = $this->_scanPort($portNumber);
-            $endTime   = $this->_getmicrotime();
+            $startTime = $this->getmicrotime();
+            $result    = $this->scanPort($portNumber);
+            $endTime   = $this->getmicrotime();
             $timeDiff  = $endTime - $startTime;
             // echo "$timeDiff<br/>";
 
@@ -232,9 +232,9 @@ class udpPortScanner
             exit;
         }
 
-        $averageResponseTime = $this->_calcAvgResponseTime($noResponses, $totalTime);
+        $averageResponseTime = $this->calcAvgResponseTime($noResponses, $totalTime);
 
-        $standardDeviation = $this->_calcStdrDeviation($responsesArray);
+        $standardDeviation = $this->calcStdrDeviation($responsesArray);
 
         // calculate the timeout value
         $timeoutValue = ceil($averageResponseTime + 4 * $standardDeviation);
@@ -257,7 +257,7 @@ class udpPortScanner
         // getting from the real scan
         $estFalsePositives = $portRange * $percentFalsePositives;
 
-        $this->cleanupIterations = $this->_calcNoIterations($estFalsePositives, $percentResponses, $portRange);
+        $this->cleanupIterations = $this->calcNoIterations($estFalsePositives, $percentResponses, $portRange);
 
         if ($this->output == 1) {
             echo "<br/>";
@@ -276,7 +276,7 @@ class udpPortScanner
      *   found on php.net and used here without modification.
      */
 
-    function _getMicroTime()
+    private function _getMicroTime()
     {
         $t = microtime();
         $t = ((double) strstr($t, ' ') + (double) substr($t, 0, strpos($t, ' ')));
@@ -289,7 +289,7 @@ class udpPortScanner
      *   returns the avg response time of the initial scan.
      */
 
-    function _calcAvgResponseTime($noResponses, $totalTime)
+    private function _calcAvgResponseTime($noResponses, $totalTime)
     {
         if ($noResponses == 0) {
             $averageResponseTime = 0;
@@ -307,7 +307,7 @@ class udpPortScanner
      *   response times from the intital scan.
      */
 
-    function _calcStdrDeviation($responsesArray)
+    private function _calcStdrDeviation($responsesArray)
     {
         foreach ($responsesArray as $currentResponse) {
             $temp = pow(($averageResponseTime - $currentResponse), 2);
@@ -326,7 +326,7 @@ class udpPortScanner
      *   found on php.net and used here without modification.
      */
 
-    function _calcNoIterations($estFalsePositives, $percentResponses, $portRange)
+    private function _calcNoIterations($estFalsePositives, $percentResponses, $portRange)
     {
         // we're always going to have some cleanupIterations, so
         if ($noFalsePosititives == 0) {
